@@ -1,21 +1,21 @@
-/*
-Square pulses to drive PointGrey cameras in Rat1
- */
+/* Square pulses to drive PointGrey cameras in Rat1 */
 
-int ledPIN = 11;    
+int ledPIN = 11; 
 int inPIN = 7;
 
 boolean triggered = false;
 unsigned long pulseTimer = 0;
-unsigned long pulseDur = 1;
-unsigned long pulsePer = 32;
+unsigned long pulseDur = 2;
+unsigned long pulsePer = 33;
+int lastpulseState = LOW;
 
 int buttonState;
 int lastButtonState = HIGH;
-boolean startRec = false;
-
 unsigned long lastDebounceTime = 0;
 unsigned long debounceDelay = 50;
+
+boolean startRec = false;
+unsigned long startRecTimer = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -43,21 +43,16 @@ void pulse(unsigned long duration, unsigned long period) {
     
     if (startRec == true) {
       triggered = false;
-      unsigned long newperiod;
-      
-      if (timekeeper <= 20) {newperiod = 20-timekeeper;}
-      else {newperiod = pulsePer;}
-      pulse(duration,newperiod);
+      pulseState = LOW;
+      pulsePer = 200;
     }
-    
     else {
+      pulseState = HIGH;
       if (timekeeper >= duration) {
-        if (timekeeper < period) {
-          digitalWrite(ledPIN,LOW);
-        }
-        else {
+        pulseState = LOW;
+        if (timekeeper >= period) {
           triggered = false;
-        }
+        }   
       }
     }
   }
@@ -71,6 +66,7 @@ unsigned long tElapsed(unsigned long timer) {
 }
 
 void buttonStuff() {
+  startRec = false;
   int reading = digitalRead(inPIN);
   if (reading != lastButtonState) {
     lastDebounceTime = millis();
@@ -81,11 +77,9 @@ void buttonStuff() {
       
       if (buttonState == LOW) {
         startRec = true;
+        startRecTimer = millis();
         /*pulse(pulseDur,4);*/
         Serial.print("button pressed");
-      }
-      else {
-        startRec = false;
       }
     }
   }
