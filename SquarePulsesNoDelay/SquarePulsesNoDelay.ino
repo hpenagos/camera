@@ -29,7 +29,7 @@ void loop() {
 }
 
 void pulse(unsigned long duration, unsigned long period) {
-  
+  int currState = digitalRead(ledPIN);
   int pulseState;
   unsigned long timekeeper = tElapsed(pulseTimer);
   
@@ -44,10 +44,10 @@ void pulse(unsigned long duration, unsigned long period) {
     if (startRec == true) {
       triggered = false;
       pulseState = LOW;
-      pulsePer = 200;
+      pulsePer = 50;
     }
     else {
-      pulseState = HIGH;
+      pulseState = currState;
       if (timekeeper >= duration) {
         pulseState = LOW;
         if (timekeeper >= period) {
@@ -57,6 +57,9 @@ void pulse(unsigned long duration, unsigned long period) {
     }
   }
   digitalWrite(ledPIN,pulseState);
+  if (tElapsed(startRecTimer) > 200) {
+    pulsePer = 33;
+  }
 }
 
 unsigned long tElapsed(unsigned long timer) {
@@ -79,7 +82,7 @@ void buttonStuff() {
         startRec = true;
         startRecTimer = millis();
         /*pulse(pulseDur,4);*/
-        Serial.print("button pressed");
+        Serial.print("start");
       }
     }
   }
